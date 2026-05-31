@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "elytraweee",
+	"version": "${version}",
+	"name": "ElytraWEEE",
+	"description": "Hold any firework rocket and jump — your elytra is equipped automatically (one jump is enough). Your chestplate is swapped out safely and never dropped, and put back on after you land once you stop holding a rocket.",
+	"authors": [
+		"dev.limucc"
+	],
+	"contact": {
+		"homepage": "https://github.com/dev-limucc/ElytraWEEE",
+		"sources": "https://github.com/dev-limucc/ElytraWEEE",
+		"issues": "https://github.com/dev-limucc/ElytraWEEE/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/elytraweee/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.limucc.elytraweee.ElytraWeeeClient"
+		],
+		"modmenu": [
+			"dev.limucc.elytraweee.integration.ModMenuIntegration"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.2",
+		"minecraft": "~26.1",
+		"java": ">=25",
+		"fabric-api": "*",
+		"cloth-config2": "*"
+	},
+	"suggests": {
+		"modmenu": "*"
+	}
+}
