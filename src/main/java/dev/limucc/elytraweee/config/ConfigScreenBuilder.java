@@ -9,6 +9,9 @@ import net.minecraft.network.chat.Component;
 /**
  * Builds the Cloth Config screen, organised into focused tabs:
  * General, Auto-Deploy, Swap-Back, Fast Swap, and Info.
+ *
+ * <p>Tooltips are split into short lines (one {@link Component} per line) so the hover text stays
+ * compact and readable next to each option, rather than one long wrapping sentence.
  */
 public final class ConfigScreenBuilder {
 
@@ -31,8 +34,10 @@ public final class ConfigScreenBuilder {
         general.addEntry(eb.startBooleanToggle(Component.literal("Enable ElytraWEEE"), cfg.enabled)
                 .setDefaultValue(true)
                 .setTooltip(
-                        Component.literal("Master switch for the automatic deploy. When off, jumping with a firework does nothing."),
-                        Component.literal("Can also be toggled in-game with the \"Toggle ElytraWEEE on/off\" keybind."))
+                        Component.literal("Master switch for auto-deploy."),
+                        Component.literal("When off, jumping with a"),
+                        Component.literal("firework does nothing."),
+                        Component.literal("Also toggleable via keybind."))
                 .setSaveConsumer(v -> cfg.enabled = v)
                 .build());
 
@@ -43,16 +48,22 @@ public final class ConfigScreenBuilder {
                 .setDefaultValue(ElytraWeeeConfig.JumpMode.SINGLE)
                 .setEnumNameProvider(e -> Component.literal(e == ElytraWeeeConfig.JumpMode.SINGLE ? "Single jump" : "Double jump"))
                 .setTooltip(
-                        Component.literal("Single: one jump while holding a firework equips the elytra."),
-                        Component.literal("Double: two quick jumps equip the elytra."))
+                        Component.literal("Single: one jump (with a"),
+                        Component.literal("firework) equips the elytra."),
+                        Component.literal("Double: two quick jumps."),
+                        Component.literal("Either way you start gliding"),
+                        Component.literal("immediately — no extra tap."))
                 .setSaveConsumer(v -> cfg.jumpMode = v)
                 .build());
 
         deploy.addEntry(eb.startBooleanToggle(Component.literal("Grace window (jump first, grab firework after)"), cfg.graceWindowEnabled)
                 .setDefaultValue(true)
                 .setTooltip(
-                        Component.literal("If you jump first and grab a firework a split-second later, the elytra still deploys."),
-                        Component.literal("Off = the firework must already be in hand on the jump (strict)."))
+                        Component.literal("Jump first, then grab a"),
+                        Component.literal("firework a split-second later"),
+                        Component.literal("— the elytra still deploys."),
+                        Component.literal("Off = firework must be in"),
+                        Component.literal("hand on the jump (strict)."))
                 .setSaveConsumer(v -> cfg.graceWindowEnabled = v)
                 .build());
 
@@ -60,8 +71,10 @@ public final class ConfigScreenBuilder {
                 .setDefaultValue(10)
                 .setTextGetter(v -> Component.literal(v + " ticks (" + String.format("%.2f", v / 20.0) + "s)"))
                 .setTooltip(
-                        Component.literal("How long after a jump you may grab a firework and still deploy. 20 ticks = 1 second."),
-                        Component.literal("Only used when the grace window is enabled."))
+                        Component.literal("How long after a jump you may"),
+                        Component.literal("grab a firework and still fly."),
+                        Component.literal("20 ticks = 1 second."),
+                        Component.literal("Used only if grace is enabled."))
                 .setSaveConsumer(v -> cfg.graceWindowTicks = v)
                 .build());
 
@@ -71,16 +84,22 @@ public final class ConfigScreenBuilder {
         swapBack.addEntry(eb.startBooleanToggle(Component.literal("Swap chestplate back after landing (no firework)"), cfg.swapBackWhenNotHoldingFirework)
                 .setDefaultValue(true)
                 .setTooltip(
-                        Component.literal("After you land, restore your chestplate once you are no longer holding a firework."),
-                        Component.literal("Never happens mid-air. Keep holding a firework after landing to stay in the elytra and take off again."))
+                        Component.literal("After landing, restore your"),
+                        Component.literal("chestplate once you stop"),
+                        Component.literal("holding a firework."),
+                        Component.literal("Never happens mid-air."),
+                        Component.literal("Keep holding a firework to"),
+                        Component.literal("stay in the elytra."))
                 .setSaveConsumer(v -> cfg.swapBackWhenNotHoldingFirework = v)
                 .build());
 
         swapBack.addEntry(eb.startBooleanToggle(Component.literal("Always swap chestplate back the instant you land"), cfg.swapBackOnLanding)
                 .setDefaultValue(false)
                 .setTooltip(
-                        Component.literal("Restore your chestplate as soon as you land, even if you are still holding a firework."),
-                        Component.literal("Off by default — the option above already handles landing for most cases."))
+                        Component.literal("Restore your chestplate as"),
+                        Component.literal("soon as you land, even while"),
+                        Component.literal("still holding a firework."),
+                        Component.literal("Off by default."))
                 .setSaveConsumer(v -> cfg.swapBackOnLanding = v)
                 .build());
 
@@ -90,18 +109,35 @@ public final class ConfigScreenBuilder {
         fastSwap.addEntry(eb.startBooleanToggle(Component.literal("Enable fast-swap keybind"), cfg.fastSwapEnabled)
                 .setDefaultValue(true)
                 .setTooltip(
-                        Component.literal("Instantly toggle between elytra and chestplate with a keybind — works mid-air (built for mace PvP)."),
-                        Component.literal("Independent of the master switch, so you can keep this on with auto-deploy off."),
-                        Component.literal("Bind the key under Options > Controls > ElytraWEEE."))
+                        Component.literal("Toggle elytra/chestplate"),
+                        Component.literal("instantly with a keybind."),
+                        Component.literal("Works mid-air (mace PvP)."),
+                        Component.literal("Works even with auto-deploy"),
+                        Component.literal("off. Bind it under"),
+                        Component.literal("Controls > ElytraWEEE."))
                 .setSaveConsumer(v -> cfg.fastSwapEnabled = v)
+                .build());
+
+        fastSwap.addEntry(eb.startBooleanToggle(Component.literal("Auto-resume gliding after swapping back"), cfg.autoReglideOnFastSwap)
+                .setDefaultValue(true)
+                .setTooltip(
+                        Component.literal("Fast-swap back to the elytra"),
+                        Component.literal("in the air and you keep"),
+                        Component.literal("gliding automatically —"),
+                        Component.literal("no need to tap jump twice."),
+                        Component.literal("On by default."))
+                .setSaveConsumer(v -> cfg.autoReglideOnFastSwap = v)
                 .build());
 
         fastSwap.addEntry(eb.startIntSlider(Component.literal("Auto-revert suppression after swap (ticks)"), cfg.fastSwapRevertCooldownTicks, 0, 100)
                 .setDefaultValue(20)
                 .setTextGetter(v -> Component.literal(v + " ticks (" + String.format("%.2f", v / 20.0) + "s)"))
                 .setTooltip(
-                        Component.literal("After a fast-swap on the ground, the automatic landing swap-back is paused for this long"),
-                        Component.literal("so it does not immediately undo your manual swap. 20 ticks = 1 second."))
+                        Component.literal("After a ground fast-swap, the"),
+                        Component.literal("auto landing swap-back is"),
+                        Component.literal("paused this long so it does"),
+                        Component.literal("not undo your manual swap."),
+                        Component.literal("20 ticks = 1 second."))
                 .setSaveConsumer(v -> cfg.fastSwapRevertCooldownTicks = v)
                 .build());
 
@@ -114,6 +150,7 @@ public final class ConfigScreenBuilder {
         addText(eb, info, "§7• Your chestplate is swapped out safely — it is never dropped.");
         addText(eb, info, "§7• It is put back on after you land, once you stop holding a firework (configurable).");
         addText(eb, info, "§7• Jump first, then grab a firework within the grace window — it still deploys.");
+        addText(eb, info, "§7• You start gliding the instant the elytra goes on — no extra jump needed.");
         addText(eb, info, "§8————————————————");
         addText(eb, info, "§l§bKeybinds§r — set them under §eOptions > Controls > ElytraWEEE§r (all unbound by default):");
         addText(eb, info, "§7• §fFast swap§7 — instantly toggle elytra/chestplate, even mid-air (mace PvP).");

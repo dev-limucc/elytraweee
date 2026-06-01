@@ -56,6 +56,11 @@ public class ElytraWeeeConfig {
      * swap is not immediately undone on the ground. 20 ticks = 1 second.
      */
     public int fastSwapRevertCooldownTicks = 20;
+    /**
+     * When you fast-swap back to the elytra while airborne, automatically resume gliding so you do
+     * not have to tap jump again to re-enter flight mode. Toggle, on by default.
+     */
+    public boolean autoReglideOnFastSwap = true;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("elytraweee.json");

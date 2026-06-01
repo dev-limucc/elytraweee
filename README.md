@@ -1,45 +1,54 @@
-# ElytraWEEE
+# ElytraWEEE 🪂
 
-Automatic elytra deploy for **Minecraft 26.1.2** (Fabric). Hold any firework rocket and jump — your elytra is equipped automatically. One jump is enough.
+**Hold a firework. Jump. Fly.** Your elytra equips itself and you start gliding instantly — chestplate swapped out safely, never dropped, and put back when you land.
 
-## Features
+Client-only Fabric mod for **Minecraft 26.1.2**. Works on servers, no server install needed.
 
-- **Jump to deploy** — while holding any firework rocket, jump and your elytra is equipped instantly. Single-jump or double-jump (configurable).
-- **Safe chestplate swap** — your chestplate is moved into your inventory, never dropped. All swaps go through normal inventory actions, so they work in singleplayer and on servers.
-- **Land-first swap back** — after you land, your chestplate is put back on once you are no longer holding a firework. Keep holding a firework after landing to stay in the elytra and take off again. Swap-back never happens mid-air.
-- **Configurable** — in-game settings via Cloth Config, reachable through Mod Menu, with a Settings tab and an Info tab.
+---
 
-## Requirements
+## ⚡ What it does
 
-- Minecraft 26.1.2 (Fabric)
-- [Fabric API](https://modrinth.com/mod/fabric-api)
-- [Cloth Config](https://modrinth.com/mod/cloth-config)
-- [Mod Menu](https://modrinth.com/mod/modmenu) (optional, to open the settings screen)
+- **Jump + firework → instant flight.** One jump. You glide right away — no second tap.
+- **Land → chestplate comes back.** Drop the firework after landing and your chestplate returns automatically.
+- **Grace window.** Jumped a hair too early? Grab the firework within ~0.5s and it still launches.
+- **Never drops your gear.** All swaps are safe. No chestplate? The elytra just goes back where it came from.
 
-## Usage
+## 🗡️ Fast swap (mace PvP)
 
-1. Keep an elytra and a firework rocket in your inventory.
-2. Hold a firework rocket and jump — the elytra is equipped automatically.
-3. Glide and boost as usual.
-4. Land, then switch off the firework — your chestplate goes back on.
+One key to flip **elytra ⇄ chestplate instantly — even mid-air.**
 
-## Settings
+- Swap to chestplate, hit, swap back → **you keep gliding** (no re-jump).
+- Works even with auto-deploy off.
 
-Open **Mod Menu → ElytraWEEE → Settings**:
+## ⌨️ Keybinds
 
-- **Enable ElytraWEEE** — master switch.
-- **Jump mode** — single jump or double jump.
-- **Swap chestplate back after landing (no firework)** — restore your chestplate after landing, once you stop holding a firework.
-- **Always swap chestplate back the instant you land** — restore your chestplate the moment you land, even while still holding a firework (off by default).
+Under **Options → Controls → ElytraWEEE** (all unbound by default — set your own):
 
-## Building
+- **Fast swap** — elytra ⇄ chestplate, anytime
+- **Toggle on/off** — flip the mod without a menu
+- **Open settings** — config screen in-game
+
+## 🎛️ Settings
+
+**Mod Menu → ElytraWEEE** — tabs for General, Auto-Deploy, Swap-Back, Fast Swap, Info.
+
+> 🧠 The mod only manages an elytra **it** deployed. Put one on yourself? It leaves your gear alone.
+
+---
+
+## 🔧 Build
 
 ```
 ./gradlew build
 ```
 
-The built jar is produced in `build/libs/`. Requires JDK 25.
+Needs Java 25. Optional deps: Cloth Config + Mod Menu.
 
-## License
+## 📦 Requirements
 
-[MIT](LICENSE)
+- Minecraft 26.1.2 (Fabric)
+- [Fabric API](https://modrinth.com/mod/fabric-api)
+- [Cloth Config](https://modrinth.com/mod/cloth-config)
+- [Mod Menu](https://modrinth.com/mod/modmenu) *(optional — opens the settings screen)*
+
+**by dev-limucc · [MIT](LICENSE)**
