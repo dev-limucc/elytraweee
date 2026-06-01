@@ -1,12 +1,14 @@
 package dev.limucc.elytraweee;
 
+import dev.limucc.elytraweee.config.ConfigScreenBuilder;
 import dev.limucc.elytraweee.config.ElytraWeeeConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 /**
- * Client entrypoint. Loads the config and drives the swap logic each client tick.
+ * Client entrypoint. Loads the config, registers keybinds, and drives the swap logic each client tick.
  */
 public class ElytraWeeeClient implements ClientModInitializer {
 
@@ -17,10 +19,34 @@ public class ElytraWeeeClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ElytraWeeeConfig.load();
+        KeyBindings.register();
         ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
     }
 
     private void onEndClientTick(Minecraft client) {
+        // Drain keybind presses first so any state they set is honoured by the tick below.
+        while (KeyBindings.fastSwap.consumeClick()) {
+            handler.fastSwap(client);
+        }
+        while (KeyBindings.openConfig.consumeClick()) {
+            if (client.player != null) {
+                client.setScreen(ConfigScreenBuilder.build(client.screen));
+            }
+        }
+        while (KeyBindings.toggleEnabled.consumeClick()) {
+            toggleEnabled(client);
+        }
+
         handler.tick(client);
+    }
+
+    private void toggleEnabled(Minecraft client) {
+        ElytraWeeeConfig cfg = ElytraWeeeConfig.get();
+        cfg.enabled = !cfg.enabled;
+        cfg.save();
+        if (client.player != null) {
+            client.player.sendOverlayMessage(
+                    Component.literal("ElytraWEEE: " + (cfg.enabled ? "§aEnabled" : "§cDisabled")));
+        }
     }
 }

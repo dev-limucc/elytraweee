@@ -41,6 +41,11 @@ public class ElytraSwapHandler {
     private int firstJumpTick = 0;
     private long tickCounter = 0;
 
+    /** Tick of a jump that is "armed" and waiting for a firework (grace window). 0 = none. */
+    private int pendingJumpTick = 0;
+    /** Until this tick, the automatic landing swap-back is suppressed (so fast-swap is not undone). */
+    private long suppressAutoRevertUntilTick = 0;
+
     public void tick(Minecraft client) {
         tickCounter++;
 
@@ -82,16 +87,30 @@ public class ElytraSwapHandler {
         prevJumpDown = jumpDown;
 
         boolean triggerEquip = false;
-        if (jumpEdge && holdingFirework && !wearingElytra && state == State.IDLE) {
-            if (cfg.jumpMode == ElytraWeeeConfig.JumpMode.SINGLE) {
+        // A qualifying jump (per jump mode) either equips right away (firework already held) or arms
+        // a grace window so that grabbing a firework a moment later still deploys the elytra.
+        if (jumpEdge && !wearingElytra && state == State.IDLE && jumpModeSatisfied(cfg)) {
+            if (holdingFirework) {
                 triggerEquip = true;
-            } else { // DOUBLE
-                if (firstJumpTick > 0 && (tickCounter - firstJumpTick) <= DOUBLE_JUMP_WINDOW_TICKS) {
-                    triggerEquip = true;
-                    firstJumpTick = 0;
-                } else {
-                    firstJumpTick = (int) tickCounter;
-                }
+                pendingJumpTick = 0;
+            } else if (cfg.graceWindowEnabled) {
+                pendingJumpTick = (int) tickCounter;
+            }
+        }
+
+        // --- Grace window: deploy if a firework is grabbed shortly after a jump, while airborne ---
+        if (pendingJumpTick > 0) {
+            if (tickCounter - pendingJumpTick > cfg.graceWindowTicks) {
+                pendingJumpTick = 0; // expired
+            } else if (wearingElytra || state != State.IDLE) {
+                pendingJumpTick = 0; // no longer applicable
+            } else if (player.onGround() && tickCounter > pendingJumpTick + 1) {
+                // Back on the ground without ever leaving (the +1 skips the take-off tick where
+                // onGround() can still read true): the jump did not lead to flight, so drop it.
+                pendingJumpTick = 0;
+            } else if (holdingFirework) {
+                triggerEquip = true;
+                pendingJumpTick = 0;
             }
         }
 
@@ -103,6 +122,7 @@ public class ElytraSwapHandler {
                 state = State.EQUIPPED;
                 chestWasOccupied = chestOccupied;
                 groundedTicks = 0;
+                pendingJumpTick = 0;
             }
         }
 
@@ -115,7 +135,7 @@ public class ElytraSwapHandler {
             if (state == State.EQUIPPED) {
                 reset();
             }
-        } else if (!triggerEquip && canClick) {
+        } else if (!triggerEquip && canClick && tickCounter >= suppressAutoRevertUntilTick) {
             boolean landed = player.onGround() && !player.isFallFlying()
                     && groundedTicks >= LAND_REVERT_DELAY_TICKS;
             boolean revert = false;
@@ -134,6 +154,70 @@ public class ElytraSwapHandler {
                 reset();
             }
         }
+    }
+
+    /**
+     * Whether the current jump satisfies the configured jump mode. SINGLE: always. DOUBLE: only on
+     * the second jump within {@link #DOUBLE_JUMP_WINDOW_TICKS}, tracking the first jump's tick.
+     * Only call on a real jump edge.
+     */
+    private boolean jumpModeSatisfied(ElytraWeeeConfig cfg) {
+        if (cfg.jumpMode == ElytraWeeeConfig.JumpMode.SINGLE) {
+            return true;
+        }
+        if (firstJumpTick > 0 && (tickCounter - firstJumpTick) <= DOUBLE_JUMP_WINDOW_TICKS) {
+            firstJumpTick = 0;
+            return true;
+        }
+        firstJumpTick = (int) tickCounter;
+        return false;
+    }
+
+    /**
+     * Instantly toggle between the elytra and a chestplate, including mid-air (unlike the automatic
+     * swap-back, which only runs on the ground). Bound to the Fast Swap keybind — built for mace PvP
+     * where you need to switch in the air. Reuses the same no-drop inventory routines.
+     */
+    public void fastSwap(Minecraft client) {
+        LocalPlayer player = client.player;
+        if (player == null || client.gameMode == null) {
+            return;
+        }
+        ElytraWeeeConfig cfg = ElytraWeeeConfig.get();
+        // Independent of the master switch so PvP players can keep the manual swap with auto-deploy off.
+        if (!cfg.fastSwapEnabled) {
+            return;
+        }
+        AbstractContainerMenu menu = player.containerMenu;
+        boolean canClick = menu == player.inventoryMenu
+                && client.screen == null
+                && menu.getCarried().isEmpty()
+                && menu.slots.size() > CHEST_SLOT;
+        if (!canClick) {
+            return;
+        }
+
+        boolean wearingElytra = player.getItemBySlot(EquipmentSlot.CHEST).getItem() == Items.ELYTRA;
+        if (wearingElytra) {
+            // Take the elytra off. A no-op when there is no chestplate to swap in (keeps the elytra on).
+            if (swapBackToChestplate(client, player, menu)) {
+                reset();
+                suppressAutoRevertUntilTick = tickCounter + cfg.fastSwapRevertCooldownTicks;
+            }
+            return;
+        }
+
+        int elytraSlot = findElytraSlot(menu);
+        if (elytraSlot < 0) {
+            return;
+        }
+        boolean chestOccupied = menu.getSlot(CHEST_SLOT).hasItem();
+        equipElytra(client, player, menu, elytraSlot, chestOccupied);
+        state = State.EQUIPPED;
+        chestWasOccupied = chestOccupied;
+        groundedTicks = 0;
+        pendingJumpTick = 0;
+        suppressAutoRevertUntilTick = tickCounter + cfg.fastSwapRevertCooldownTicks;
     }
 
     // ---- Equip / revert routines (cursor-balanced; never drop items) ----
@@ -221,5 +305,7 @@ public class ElytraSwapHandler {
         chestWasOccupied = false;
         groundedTicks = 0;
         firstJumpTick = 0;
+        pendingJumpTick = 0;
+        // Note: suppressAutoRevertUntilTick is intentionally NOT reset here — it must outlive a swap.
     }
 }

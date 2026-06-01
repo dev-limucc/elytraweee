@@ -37,6 +37,26 @@ public class ElytraWeeeConfig {
      */
     public boolean swapBackOnLanding = false;
 
+    /**
+     * Grace window for the "jump first, grab a firework a moment later" case. When on, pressing
+     * jump arms a short window; if you start holding a firework within {@link #graceWindowTicks}
+     * ticks (while still airborne) the elytra is deployed as if you had been holding it on the jump.
+     */
+    public boolean graceWindowEnabled = true;
+    /** Length of the grace window in client ticks (20 ticks = 1 second). Default 10 = 0.5s. */
+    public int graceWindowTicks = 10;
+
+    /**
+     * Master switch for the fast-swap keybind (instant elytra/chestplate toggle, also mid-air).
+     * Independent of {@link #enabled} so PvP players can keep the manual swap while auto-deploy is off.
+     */
+    public boolean fastSwapEnabled = true;
+    /**
+     * After a fast-swap, suppress the automatic landing swap-back for this many ticks so a manual
+     * swap is not immediately undone on the ground. 20 ticks = 1 second.
+     */
+    public int fastSwapRevertCooldownTicks = 20;
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("elytraweee.json");
 
@@ -84,5 +104,11 @@ public class ElytraWeeeConfig {
         if (jumpMode == null) {
             jumpMode = JumpMode.SINGLE;
         }
+        graceWindowTicks = clamp(graceWindowTicks, 0, 40);
+        fastSwapRevertCooldownTicks = clamp(fastSwapRevertCooldownTicks, 0, 100);
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
