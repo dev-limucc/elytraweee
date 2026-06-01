@@ -45,8 +45,8 @@ public class ElytraWeeeClient implements ClientModInitializer {
         cfg.enabled = !cfg.enabled;
         cfg.save();
         if (client.player != null) {
-            client.player.displayClientMessage(
-                    Component.literal("ElytraWEEE: " + (cfg.enabled ? "§aEnabled" : "§cDisabled")), true);
+            client.player.sendOverlayMessage(
+                    Component.literal("ElytraWEEE: " + (cfg.enabled ? "§aEnabled" : "§cDisabled")));
         }
     }
 }

@@ -1,7 +1,7 @@
 package dev.limucc.elytraweee;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 
@@ -14,7 +14,7 @@ public final class KeyBindings {
 
     /** Dedicated controls category; its label is keyed as {@code key.category.elytraweee.main}. */
     public static final KeyMapping.Category CATEGORY =
-            KeyMapping.Category.register(Identifier.of(ElytraWeeeClient.MOD_ID, "main"));
+            KeyMapping.Category.register(Identifier.fromNamespaceAndPath(ElytraWeeeClient.MOD_ID, "main"));
 
     public static KeyMapping openConfig;
     public static KeyMapping fastSwap;
@@ -30,10 +30,10 @@ public final class KeyBindings {
     }
 
     private static KeyMapping register(String translationKey) {
-        return KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        // Unbound by default (InputConstants.UNKNOWN); the player assigns a key under Controls.
+        return KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 translationKey,
-                InputConstants.Type.KEYSYM,
-                InputConstants.UNKNOWN.getValue(), // unbound by default
+                InputConstants.UNKNOWN.getValue(),
                 CATEGORY));
     }
 }
