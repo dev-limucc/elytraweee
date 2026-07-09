@@ -84,7 +84,7 @@ public class ElytraSwapHandler {
         AbstractContainerMenu menu = player.containerMenu;
         // Only act when the player's own inventory menu is active (no chest/GUI open) and the cursor is empty.
         boolean canClick = menu == player.inventoryMenu
-                && client.screen == null
+                && client.gui.screen() == null
                 && menu.getCarried().isEmpty()
                 && menu.slots.size() > CHEST_SLOT;
 
@@ -99,7 +99,7 @@ public class ElytraSwapHandler {
         }
 
         // --- Jump detection (rising edge of the jump key) ---
-        boolean jumpEdge = jumpDown && !prevJumpDown && client.screen == null;
+        boolean jumpEdge = jumpDown && !prevJumpDown && client.gui.screen() == null;
         prevJumpDown = jumpDown;
 
         boolean triggerEquip = false;
@@ -247,7 +247,7 @@ public class ElytraSwapHandler {
         }
         AbstractContainerMenu menu = player.containerMenu;
         boolean canClick = menu == player.inventoryMenu
-                && client.screen == null
+                && client.gui.screen() == null
                 && menu.getCarried().isEmpty()
                 && menu.slots.size() > CHEST_SLOT;
         if (!canClick) {

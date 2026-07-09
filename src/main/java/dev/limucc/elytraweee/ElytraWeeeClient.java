@@ -30,7 +30,7 @@ public class ElytraWeeeClient implements ClientModInitializer {
         }
         while (KeyBindings.openConfig.consumeClick()) {
             if (client.player != null) {
-                client.setScreen(ConfigScreenBuilder.build(client.screen));
+                client.gui.setScreen(ConfigScreenBuilder.build(client.gui.screen()));
             }
         }
         while (KeyBindings.toggleEnabled.consumeClick()) {
