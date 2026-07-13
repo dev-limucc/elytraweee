@@ -4,6 +4,10 @@
 
 Client-only Fabric mod for **Minecraft 26.1.2**. Works on servers, no server install needed.
 
+<p align="center">
+  <img src="https://cdn.modrinth.com/data/vbRcbu5L/images/86fa980f832659d152922d03744ec00b83bff039.webp" alt="Auto-elytra via firework — glide on demand" width="80%" />
+</p>
+
 ---
 
 ## ⚡ What it does
@@ -52,3 +56,9 @@ Needs Java 25. Optional deps: Cloth Config + Mod Menu.
 - [Mod Menu](https://modrinth.com/mod/modmenu) *(optional — opens the settings screen)*
 
 **by dev-limucc · [MIT](LICENSE)**
+
+## Gallery
+
+<p align="center">
+  <img src="https://cdn.modrinth.com/data/vbRcbu5L/images/2db18b7ecfef040234adac560b33f3f1d74d70a1.png" alt="ElytraWEEE config screen" width="70%" />
+</p>
