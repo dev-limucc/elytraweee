@@ -1,5 +1,7 @@
 # ElytraWEEE 🪂
 
+[![build](https://github.com/dev-limucc/elytraweee/actions/workflows/build.yml/badge.svg)](https://github.com/dev-limucc/elytraweee/actions/workflows/build.yml)
+
 **Hold a firework. Jump. Fly.** Your elytra equips itself and you start gliding instantly — chestplate swapped out safely, never dropped, and put back when you land.
 
 Client-only Fabric mod for **Minecraft 26.1.2**. Works on servers, no server install needed.
