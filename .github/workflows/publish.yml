@@ -1,7 +1,8 @@
 name: Publish to Modrinth
 
-# Fires whenever you publish a GitHub Release. The release tag (e.g. v1.2.0) and
-# its notes become the Modrinth version number and changelog automatically.
+# Fires whenever you publish a GitHub Release. The release tag (e.g. v1.4.0-beta.1) and its notes
+# become the Modrinth version number and changelog. One matrix job per Minecraft version: each builds
+# its own jar (-Ptarget) and uploads it with the matching game version.
 on:
   release:
     types: [published]
@@ -11,6 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: '26.1.2'
+            game-versions: |
+              26.1
+              26.1.1
+              26.1.2
+          - target: '26.2'
+            game-versions: |
+              26.2
+          - target: '26.3'
+            game-versions: |
+              26.3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,7 +38,7 @@ jobs:
           java-version: "25"
 
       - name: Build
-        run: ./gradlew build --no-daemon
+        run: chmod +x gradlew && ./gradlew build --no-daemon "-Ptarget=${{ matrix.target }}"
 
       - name: Publish to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -30,13 +46,12 @@ jobs:
           modrinth-id: vbRcbu5L
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: build/libs/!(*-sources).jar
-          # Pull version number + changelog straight from the GitHub release.
-          name: ElytraWEEE ${{ github.event.release.tag_name }}
-          version: ${{ github.event.release.tag_name }}
+          name: ElytraWEEE ${{ github.event.release.tag_name }} (MC ${{ matrix.target }})
+          version: ${{ github.event.release.tag_name }}+mc${{ matrix.target }}
           changelog: ${{ github.event.release.body }}
-          version-type: release
+          version-type: ${{ contains(github.event.release.tag_name, 'beta') && 'beta' || 'release' }}
           loaders: fabric
-          game-versions: "26.1.2"
+          game-versions: ${{ matrix.game-versions }}
           dependencies: |
             fabric-api(required)
             cloth-config(required)

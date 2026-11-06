@@ -1,5 +1,6 @@
 package dev.limucc.elytraweee;
 
+import dev.limucc.elytraweee.compat.ScreenNav;
 import dev.limucc.elytraweee.config.ElytraWeeeConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -84,7 +85,7 @@ public class ElytraSwapHandler {
         AbstractContainerMenu menu = player.containerMenu;
         // Only act when the player's own inventory menu is active (no chest/GUI open) and the cursor is empty.
         boolean canClick = menu == player.inventoryMenu
-                && client.gui.screen() == null
+                && ScreenNav.current(client) == null
                 && menu.getCarried().isEmpty()
                 && menu.slots.size() > CHEST_SLOT;
 
@@ -99,7 +100,7 @@ public class ElytraSwapHandler {
         }
 
         // --- Jump detection (rising edge of the jump key) ---
-        boolean jumpEdge = jumpDown && !prevJumpDown && client.gui.screen() == null;
+        boolean jumpEdge = jumpDown && !prevJumpDown && ScreenNav.current(client) == null;
         prevJumpDown = jumpDown;
 
         boolean triggerEquip = false;
@@ -247,7 +248,7 @@ public class ElytraSwapHandler {
         }
         AbstractContainerMenu menu = player.containerMenu;
         boolean canClick = menu == player.inventoryMenu
-                && client.gui.screen() == null
+                && ScreenNav.current(client) == null
                 && menu.getCarried().isEmpty()
                 && menu.slots.size() > CHEST_SLOT;
         if (!canClick) {

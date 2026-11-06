@@ -20,3 +20,6 @@ bin/
 
 # Fabric dev run
 run/
+
+# Release jars collected by build-all.ps1
+dist/

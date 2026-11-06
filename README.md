@@ -4,7 +4,7 @@
 
 **Hold a firework. Jump. Fly.** Your elytra equips itself and you start gliding instantly — chestplate swapped out safely, never dropped, and put back when you land.
 
-Client-only Fabric mod for **Minecraft 26.1.2**. Works on servers, no server install needed.
+Client-only Fabric mod for **Minecraft 26.1.2, 26.2 and 26.3** (one jar per version). Works on servers, no server install needed.
 
 <p align="center">
   <img src="https://cdn.modrinth.com/data/vbRcbu5L/images/86fa980f832659d152922d03744ec00b83bff039.webp" alt="Auto-elytra via firework — glide on demand" width="80%" />
@@ -45,14 +45,15 @@ Under **Options → Controls → ElytraWEEE** (all unbound by default — set yo
 ## 🔧 Build
 
 ```
-./gradlew build
+./gradlew build "-Ptarget=26.3"     # targets: 26.1.2, 26.2, 26.3
+.uild-all.ps1                      # every target -> dist./gradlew runClientGameTest "-Ptarget=26.3"   # real-world client gametest (not shipped)
 ```
 
-Needs Java 25. Optional deps: Cloth Config + Mod Menu.
+Needs Java 25. Jars are named `elytraweee-<version>+mc<minecraft>.jar`. Required: Fabric API + Cloth Config.
 
 ## 📦 Requirements
 
-- Minecraft 26.1.2 (Fabric)
+- Minecraft 26.1.2, 26.2 or 26.3 (Fabric) - pick the jar that matches your game version
 - [Fabric API](https://modrinth.com/mod/fabric-api)
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
 - [Mod Menu](https://modrinth.com/mod/modmenu) *(optional — opens the settings screen)*

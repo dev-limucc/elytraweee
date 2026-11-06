@@ -1,5 +1,6 @@
 package dev.limucc.elytraweee;
 
+import dev.limucc.elytraweee.compat.ScreenNav;
 import dev.limucc.elytraweee.config.ConfigScreenBuilder;
 import dev.limucc.elytraweee.config.ElytraWeeeConfig;
 import net.fabricmc.api.ClientModInitializer;
@@ -30,7 +31,7 @@ public class ElytraWeeeClient implements ClientModInitializer {
         }
         while (KeyBindings.openConfig.consumeClick()) {
             if (client.player != null) {
-                client.gui.setScreen(ConfigScreenBuilder.build(client.gui.screen()));
+                ScreenNav.open(client, ConfigScreenBuilder.build(ScreenNav.current(client)));
             }
         }
         while (KeyBindings.toggleEnabled.consumeClick()) {

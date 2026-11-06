@@ -1,66 +1,163 @@
-plugins {
-	id 'net.fabricmc.fabric-loom' version "${loom_version}"
-	id 'maven-publish'
+// Two Loom plugins exist since MC went unobfuscated: classic remapping Loom for 1.21.x
+// ('net.fabricmc.fabric-loom-remap') and the new non-remapping Loom for 26.1+
+// ('net.fabricmc.fabric-loom'). The plugins{} block can't choose conditionally, so we
+// resolve + apply by hand based on -Ptarget.
+buildscript {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        def tv = (project.findProperty('target') ?: '26.2').toString()
+        if (tv.startsWith('1.')) {
+            classpath "net.fabricmc.fabric-loom-remap:net.fabricmc.fabric-loom-remap.gradle.plugin:${project.legacy_loom_version}"
+        } else {
+            classpath "net.fabricmc.fabric-loom:net.fabricmc.fabric-loom.gradle.plugin:${project.loom_version}"
+        }
+    }
 }
 
-version = project.mod_version
-group = project.maven_group
+apply plugin: 'maven-publish'
+apply plugin: ((findProperty('target') ?: '26.2').toString().startsWith('1.')
+        ? 'net.fabricmc.fabric-loom-remap'
+        : 'net.fabricmc.fabric-loom')
+
+// ---- multi-version target matrix --------------------------------------------
+// Build one MC target with:  gradlew build -Ptarget=<key>     (default: 26.2)
+// Each jar covers the 'range' it declares in fabric.mod.json. 'legacy' targets are
+// obfuscated MC: they need Mojang mappings + remapped (mod*) dependencies.
+def TARGETS = [
+    '26.1.2':  [range: '~26.1', fapi: '0.150.0+26.1.2', modmenu: '18.0.0-beta.1', cloth: '26.1.154', java: 25, legacy: false, loaderReq: '>=0.19.2',
+                overlays: ['nav-legacy']],
+    '26.2':    [range: '~26.2', fapi: '0.154.2+26.2',   modmenu: '20.0.0',        cloth: '26.2.155', java: 25, legacy: false, loaderReq: '>=0.19.3',
+                overlays: ['nav-262']],
+    '26.3':    [range: '~26.3', fapi: '0.165.2+26.3',   modmenu: '21.0.0',        cloth: '26.3.159', java: 25, legacy: false, loaderReq: '>=0.20.1', loader: '0.20.1',
+                overlays: ['nav-262']],
+]
+
+def targetVer = (findProperty('target') ?: '26.2').toString()
+def t = TARGETS[targetVer]
+if (t == null) throw new GradleException("Unknown -Ptarget=${targetVer}. Known targets: ${TARGETS.keySet()}")
+
+def loaderVer = (t.loader ?: project.loader_version).toString()
+
+version = "${project.mod_version}+mc${targetVer}"
+group   = project.maven_group
 
 base {
-	archivesName = project.archives_base_name
-}
-
-repositories {
-	// Cloth Config
-	maven {
-		name = 'Shedaniel'
-		url = 'https://maven.shedaniel.me/'
-	}
-	// Mod Menu
-	maven {
-		name = 'TerraformersMC'
-		url = 'https://maven.terraformersmc.com/releases/'
-	}
+    archivesName = project.archives_base_name
 }
 
 loom {
-	mods {
-		"elytraweee" {
-			sourceSet sourceSets.main
-		}
-	}
+    mods {
+        "elytraweee" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// Client gametest (runClientGameTest): src/gametest. Never packaged into the release jar.
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "elytraweee-test"
+        enableGameTests = false
+        enableClientGameTests = true
+        eula = true
+    }
+}
+
+// dev convenience:  gradlew runClient "-PquickPlay=New World"  auto-joins that singleplayer save
+if (findProperty('quickPlay')) {
+    loom.runs.client.programArgs('--quickPlaySingleplayer', findProperty('quickPlay').toString())
+    loom.runs.client.programArgs('--username', 'ElytraDev')
+}
+
+// ---- production run: launches the BUILT release jar (plus Fabric API, Cloth Config, Mod Menu) in a vanilla-style client ----
+//   gradlew runProductionClient "-Ptarget=26.3" ["-PprodWorld=<save folder name under run/prod/saves>"]
+configurations {
+    prodMods {
+        transitive = false
+        canBeConsumed = false
+    }
+}
+
+tasks.register('runProductionClient', net.fabricmc.loom.task.prod.ClientProductionRunTask) {
+    group = 'fabric'
+    description = 'Launch the built jar in a production (non-dev) client'
+    mods.from(t.legacy ? tasks.named('remapJar') : tasks.named('jar'))
+    mods.from(configurations.prodMods)
+    runDir = layout.projectDirectory.dir('run/prod')
+    minecraftVersion = targetVer
+    if (findProperty('prodWorld')) {
+        programArgs.addAll('--quickPlaySingleplayer', findProperty('prodWorld').toString())
+    }
+}
+
+// version-specific source overlays (screen navigation, ...)
+t.overlays.each { sourceSets.main.java.srcDir "src/main/versions/${it}/java" }
+t.overlays.each { def rd = file("src/main/versions/${it}/resources"); if (rd.exists()) sourceSets.main.resources.srcDir rd }
+
+repositories {
+    mavenCentral()
+    maven { url = "https://api.modrinth.com/maven" }
+    // Cloth Config
+    maven {
+        name = 'Shedaniel'
+        url = 'https://maven.shedaniel.me/'
+    }
 }
 
 dependencies {
-	// 26.1 is unobfuscated: use plain implementation/compileOnly (no modImplementation, no mappings).
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    prodMods "net.fabricmc.fabric-api:fabric-api:${t.fapi}"
+    prodMods("me.shedaniel.cloth:cloth-config-fabric:${t.cloth}") { transitive = false }
+    prodMods "maven.modrinth:modmenu:${t.modmenu}"
+    minecraft "com.mojang:minecraft:${targetVer}"
 
-	// GUI: Cloth Config + Mod Menu. Exclude their transitive fabric-api to avoid version clashes.
-	implementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
-		exclude(group: "net.fabricmc.fabric-api")
-	}
-	implementation("com.terraformersmc:modmenu:${project.modmenu_version}") {
-		exclude(group: "net.fabricmc.fabric-api")
-	}
+    if (t.legacy) {
+        mappings loom.officialMojangMappings()
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        modImplementation "net.fabricmc.fabric-api:fabric-api:${t.fapi}"
+        modImplementation("me.shedaniel.cloth:cloth-config-fabric:${t.cloth}") {
+            exclude(group: "net.fabricmc.fabric-api")
+        }
+        modImplementation "maven.modrinth:modmenu:${t.modmenu}"
+    } else {
+        implementation "net.fabricmc:fabric-loader:${loaderVer}"
+        implementation "net.fabricmc.fabric-api:fabric-api:${t.fapi}"
+        // Exclude Cloth Config's transitive fabric-api to avoid version clashes.
+        implementation("me.shedaniel.cloth:cloth-config-fabric:${t.cloth}") {
+            exclude(group: "net.fabricmc.fabric-api")
+        }
+        implementation "maven.modrinth:modmenu:${t.modmenu}"
+    }
 }
 
 processResources {
-	def props = ["version": project.version]
-
-	inputs.properties props
-
-	filesMatching("fabric.mod.json") {
-		expand props
-	}
+    def props = [
+        version   : project.version.toString(),
+        mc_range  : t.range,
+        java_req  : t.java.toString(),
+        loader_req: t.loaderReq,
+    ]
+    inputs.properties props
+    filesMatching("fabric.mod.json") {
+        expand props
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+    it.options.release = t.java
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.toVersion(t.java)
+    targetCompatibility = JavaVersion.toVersion(t.java)
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
 }

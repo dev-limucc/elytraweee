@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "elytraweee-test",
+  "version": "1.0.0",
+  "name": "ElytraWEEE client gametest",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": ["dev.limucc.elytraweee.gametest.ElytraWeeeGameTest"]
+  },
+  "depends": {
+    "elytraweee": "*"
+  }
+}
