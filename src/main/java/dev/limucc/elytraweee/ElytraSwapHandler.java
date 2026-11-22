@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerInput;
+import dev.limucc.elytraweee.compat.GameCompat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.equipment.Equippable;
@@ -17,7 +17,7 @@ import net.minecraft.world.item.equipment.Equippable;
 /**
  * Core ElytraWEEE behaviour, ticked every client tick.
  *
- * <p>All inventory mutations go through {@link net.minecraft.client.multiplayer.MultiPlayerGameMode#handleContainerInput}
+ * <p>All inventory mutations go through {@code MultiPlayerGameMode.handleContainerInput}
  * on the always-open player inventory menu (container id 0), so the swaps are server-authoritative and never drop items.
  *
  * <p>Player inventory menu slot layout: 5 = helmet, 6 = chest, 7 = legs, 8 = boots,
@@ -389,11 +389,11 @@ public class ElytraSwapHandler {
     }
 
     private void pickup(Minecraft client, Player player, int containerId, int slot) {
-        client.gameMode.handleContainerInput(containerId, slot, 0, ContainerInput.PICKUP, player);
+        GameCompat.pickup(client, player, containerId, slot);
     }
 
     private void quickMove(Minecraft client, Player player, int containerId, int slot) {
-        client.gameMode.handleContainerInput(containerId, slot, 0, ContainerInput.QUICK_MOVE, player);
+        GameCompat.quickMove(client, player, containerId, slot);
     }
 
     private void reset() {

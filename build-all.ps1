@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 # which cannot compile the 26.x targets ("release version 25 not supported").
 $env:JAVA_HOME = "C:\Users\Windows 11\AppData\Roaming\ATLauncher\runtimes\minecraft\java-runtime-epsilon\windows-x64\java-runtime-epsilon"
 
-$targets = @('26.1.2', '26.2', '26.3')
+$targets = @('1.21.11', '26.1.2', '26.2', '26.3')
 $failed = @()
 
 foreach ($t in $targets) {

@@ -28,12 +28,14 @@ apply plugin: ((findProperty('target') ?: '26.2').toString().startsWith('1.')
 // Each jar covers the 'range' it declares in fabric.mod.json. 'legacy' targets are
 // obfuscated MC: they need Mojang mappings + remapped (mod*) dependencies.
 def TARGETS = [
+    '1.21.11': [range: '1.21.11',  fapi: '0.141.4+1.21.11', modmenu: '17.0.0',        cloth: '21.11.153', java: 21, legacy: true,  loaderReq: '>=0.16.9',
+                overlays: ['nav-legacy', 'compat-1211']],
     '26.1.2':  [range: '~26.1', fapi: '0.150.0+26.1.2', modmenu: '18.0.0-beta.1', cloth: '26.1.154', java: 25, legacy: false, loaderReq: '>=0.19.2',
-                overlays: ['nav-legacy']],
+                overlays: ['nav-legacy', 'compat-26']],
     '26.2':    [range: '~26.2', fapi: '0.154.2+26.2',   modmenu: '20.0.0',        cloth: '26.2.155', java: 25, legacy: false, loaderReq: '>=0.19.3',
-                overlays: ['nav-262']],
+                overlays: ['nav-262', 'compat-26']],
     '26.3':    [range: '~26.3', fapi: '0.165.2+26.3',   modmenu: '21.0.0',        cloth: '26.3.159', java: 25, legacy: false, loaderReq: '>=0.20.1', loader: '0.20.1',
-                overlays: ['nav-262']],
+                overlays: ['nav-262', 'compat-26']],
 ]
 
 def targetVer = (findProperty('target') ?: '26.2').toString()

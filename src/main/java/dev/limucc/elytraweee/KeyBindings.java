@@ -1,7 +1,7 @@
 package dev.limucc.elytraweee;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import dev.limucc.elytraweee.compat.GameCompat;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 
@@ -31,7 +31,7 @@ public final class KeyBindings {
 
     private static KeyMapping register(String translationKey) {
         // Unbound by default (InputConstants.UNKNOWN); the player assigns a key under Controls.
-        return KeyMappingHelper.registerKeyMapping(new KeyMapping(
+        return GameCompat.registerKey(new KeyMapping(
                 translationKey,
                 InputConstants.UNKNOWN.getValue(),
                 CATEGORY));

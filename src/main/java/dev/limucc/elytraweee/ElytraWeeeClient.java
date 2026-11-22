@@ -1,5 +1,6 @@
 package dev.limucc.elytraweee;
 
+import dev.limucc.elytraweee.compat.GameCompat;
 import dev.limucc.elytraweee.compat.ScreenNav;
 import dev.limucc.elytraweee.config.ConfigScreenBuilder;
 import dev.limucc.elytraweee.config.ElytraWeeeConfig;
@@ -46,7 +47,7 @@ public class ElytraWeeeClient implements ClientModInitializer {
         cfg.enabled = !cfg.enabled;
         cfg.save();
         if (client.player != null) {
-            client.player.sendOverlayMessage(
+            GameCompat.overlayMessage(client.player,
                     Component.literal("ElytraWEEE: " + (cfg.enabled ? "§aEnabled" : "§cDisabled")));
         }
     }
